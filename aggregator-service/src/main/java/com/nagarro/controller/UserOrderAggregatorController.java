@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,9 @@ public class UserOrderAggregatorController {
 
 	@Autowired
 	private RestTemplate rstTmplate;
+	
+	@Autowired
+	private Environment env;
 
 	@Value("${user.service.url}")
 	private String USER_SERVICE_URL;
@@ -34,6 +38,10 @@ public class UserOrderAggregatorController {
 	public UserOrderDto getUserOrderdetails(@PathVariable("userId") String usrId) {
 		
 		logger.info("getUserOrderdetails method from controller layer started...");
+		if(env.getRequiredProperty("USER_SERVICE") != null)
+			USER_SERVICE_URL = env.getRequiredProperty("USER_SERVICE");
+		if(env.getRequiredProperty("ORDER_SERVICE") != null)
+			ORDER_SERVICE_URL = env.getRequiredProperty("ORDER_SERVICE");
 		
 		UserDto usrDto = rstTmplate.getForObject(USER_SERVICE_URL + "/user/" + usrId, UserDto.class);		
 		List<OrderDto> ordrDtoList = rstTmplate.getForObject(ORDER_SERVICE_URL + "/orders/" + usrId, ArrayList.class);
